@@ -1,3 +1,4 @@
+// productos.mock.js - Mock de productos para pruebas y desarrollo sin necesidad de una API real
 export const productosMock = [
     {
         id: 1,

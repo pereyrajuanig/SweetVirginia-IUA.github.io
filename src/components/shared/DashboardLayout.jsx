@@ -1,3 +1,6 @@
+// componente de diseño para el dashboard, incluye la barra lateral 
+// y el area principal para mostrar el contenido de cada sección del dashboard
+
 import Sidebar from "@/components/shared/Sidebar"
 
 export default function DashboardLayout({ children }) {

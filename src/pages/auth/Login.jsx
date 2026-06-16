@@ -1,3 +1,5 @@
+// Login.jsx - Pagina de inicio de sesion para el panel de gestion de Sweet Virginia
+
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
@@ -6,22 +8,26 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+// Componente de inicio de sesion
 export default function Login() {
-    const [telefono, setTelefono] = useState("")
-    const [password, setPassword] = useState("")
-    const [error, setError] = useState(null)
-    const [cargando, setCargando] = useState(false)
+    const [telefono, setTelefono] = useState("") // telefono se usa como identificador unico para el login
+    const [password, setPassword] = useState("") // contraseña del usuario
+    const [error, setError] = useState(null) // mensaje de error en caso de fallo en el login
+    const [cargando, setCargando] = useState(false) // estado para indicar que se esta procesando el login
 
-    const { login } = useAuth()
-    const navigate = useNavigate()
+    const { login } = useAuth()  // funcion para actualizar el contexto 
+    const navigate = useNavigate() // hook para redirigir a otras paginas
 
+    // se ejecuta al enviar el formulario de login
     async function handleSubmit(e) {
-        e.preventDefault()
-        setError(null)
-        setCargando(true)
+        e.preventDefault() // evita que el formulario recargue la pagina
+        setError(null) // resetea el mensaje de error
+        setCargando(true) // indica que se esta procesando el login
 
+        // llama al servicio de login con el telefono y la contraseña ingresados
         const resultado = await loginService(telefono, password)
 
+        // si el login fue exitoso, actualiza el contexto con los datos del usuario y redirige segun su rol
         if (resultado.ok) {
             login(resultado.usuario)
             if (resultado.usuario.roles.includes("administrador")) {
@@ -33,9 +39,10 @@ export default function Login() {
             setError(resultado.mensaje)
         }
 
-        setCargando(false)
+        setCargando(false) // indica que se termino de procesar el login
     }
 
+    // renderiza el formulario de login con estilos personalizados y muestra mensajes de error o estado de carga
     return (
         <div className="min-h-screen bg-[#1E1A17] flex items-center justify-center p-4">
             <div className="w-full max-w-sm">

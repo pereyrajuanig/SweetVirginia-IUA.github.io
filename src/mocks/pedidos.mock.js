@@ -1,3 +1,5 @@
+// pedidos.mock.js - Mock de pedidos para pruebas y desarrollo sin necesidad de una API real
+
 export const pedidosMock = [
     {
         id: 1,

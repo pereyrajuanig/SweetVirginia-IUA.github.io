@@ -1,3 +1,5 @@
+// badge con lo diferentes estilos y etiquetas para los diferentes estados
+
 const estilos = {
     pendiente: "bg-[#E3F0FA] text-[#1565C0]",
     confirmado: "bg-[#EEE4DC] text-[#7A6A5E]",
@@ -18,6 +20,7 @@ const etiquetas = {
     no_retirado: "No retirado",
 }
 
+// Componente que recibe el estado y muestra el badge correspondiente con el estilo y etiqueta adecuada
 export default function BadgeEstado({ estado }) {
     return (
         <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${estilos[estado] || "bg-gray-100 text-gray-600"}`}>
@@ -25,3 +28,4 @@ export default function BadgeEstado({ estado }) {
         </span>
     )
 }
+

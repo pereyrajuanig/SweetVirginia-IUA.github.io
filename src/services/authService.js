@@ -1,3 +1,4 @@
+// authService.js - Servicio para manejar la autenticacion de usuarios, con soporte para mock y API real
 const USAR_MOCK = true
 
 const usuariosMock = [
@@ -16,6 +17,7 @@ const usuariosMock = [
     },
 ]
 
+// funcion para simular el login, busca el usuario en el mock y verifica la contraseña, o hace una peticion a la API real
 export async function login(telefono, password) {
     if (USAR_MOCK) {
         const usuario = usuariosMock.find((u) => u.telefono === telefono)

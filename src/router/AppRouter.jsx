@@ -1,3 +1,5 @@
+// AppRouter.jsx - Define las rutas de la aplicacion y protege las rutas segun el rol del usuario
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import DashboardLayout from "@/components/shared/DashboardLayout"
@@ -10,20 +12,23 @@ import Emprendedoras from "@/pages/admin/Emprendedoras"
 import Usuarios from "@/pages/admin/Usuarios"
 import Metricas from "@/pages/admin/Metricas"
 
+// componente para proteger las rutas segun el rol del usuario, redirige a login si no esta autenticado o no tiene el rol requerido
 function RutaProtegida({ children, rol }) {
     const { usuario } = useAuth()
 
-    if (!usuario) {
+    if (!usuario) { // si no hay usuario autenticado, redirige a login
         return <Navigate to="/login" replace />
     }
 
-    if (rol && !usuario.roles.includes(rol)) {
+    if (rol && !usuario.roles.includes(rol)) { // si se especifica un rol y el usuario no lo tiene, redirige a login
         return <Navigate to="/login" replace />
     }
 
     return <DashboardLayout>{children}</DashboardLayout>
 }
 
+// componente principal del router de la aplicacion, define las rutas y los componentes que se renderizan en cada una
+// usando RutaProtegida para proteger las rutas segun el rol del usuario
 export default function AppRouter() {
     return (
         <BrowserRouter>

@@ -1,8 +1,11 @@
+// PanelPedidos.jsx - Componente para mostrar y gestionar los pedidos activos en el panel de la emprendedora
+
 import { useState, useEffect } from "react"
 import { getPedidos, cambiarEstadoPedido } from "@/services/pedidosService"
 import BadgeEstado from "@/components/shared/BadgeEstado"
 import { Button } from "@/components/ui/button"
 
+// Definicion de las transiciones de estado de los pedidos y sus etiquetas para los botones
 const transiciones = {
     pendiente: { label: "Confirmar", siguiente: "confirmado" },
     confirmado: { label: "Iniciar prep.", siguiente: "en_preparacion" },
@@ -10,27 +13,34 @@ const transiciones = {
     listo: { label: "Entregar", siguiente: "entregado" },
 }
 
+// Lista de filtros disponibles para mostrar los pedidos segun su estado
 const filtros = ["todos", "pendiente", "confirmado", "en_preparacion", "listo", "entregado"]
 
+// Componente principal del panel de pedidos, muestra una lista de pedidos activos con opciones para avanzar su estado
 export default function PanelPedidos() {
-    const [pedidos, setPedidos] = useState([])
-    const [filtro, setFiltro] = useState("todos")
+    const [pedidos, setPedidos] = useState([]) // estado para almacenar la lista de pedidos obtenida del servicio
+    const [filtro, setFiltro] = useState("todos") // estado para almacenar el filtro seleccionado por el usuario, por defecto muestra todos los pedidos
 
+    // Al cargar el componente, se obtienen los pedidos desde el servicio y se guardan en el estado
     useEffect(() => {
         getPedidos().then(setPedidos)
     }, [])
 
+    // Funcion para avanzar el estado de un pedido, llama al servicio para actualizarlo en el backend y luego actualiza el estado local para reflejar el cambio
     async function avanzarEstado(id, siguienteEstado) {
-        await cambiarEstadoPedido(id, siguienteEstado)
-        setPedidos((prev) =>
-            prev.map((p) => (p.id === id ? { ...p, estado: siguienteEstado } : p))
+        await cambiarEstadoPedido(id, siguienteEstado) // llama al servicio para cambiar el estado del pedido en el backend
+        setPedidos((prev) => // actualiza el estado local de los pedidos, mapeando sobre la lista y cambiando el estado del pedido que coincide con el id
+            prev.map((p) => (p.id === id ? { ...p, estado: siguienteEstado } : p)) // si el id coincide, se crea un nuevo objeto con el mismo contenido pero con el estado actualizado, si no coincide se devuelve el pedido sin cambios
         )
     }
-
+    // filtra los pedidos segun el estado seleccionado en el filtro 
     const pedidosFiltrados = filtro === "todos"
         ? pedidos
         : pedidos.filter((p) => p.estado === filtro)
 
+    // renderiza la interfaz del panel de pedidos, mostrando un header con el titulo y la cantidad de pedidos
+    // un conjunto de botones para seleccionar el filtro, y una lista de tarjetas para cada pedido filtrado que muestra su informacion 
+    // y un boton para avanzar su estado si es posible
     return (
         <div className="max-w-4xl mx-auto">
 
@@ -47,8 +57,8 @@ export default function PanelPedidos() {
                         key={f}
                         onClick={() => setFiltro(f)}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filtro === f
-                                ? "bg-[#C49A6C] text-[#1E1A17]"
-                                : "bg-[#EEE4DC] text-[#8B6F5E] hover:bg-[#E0D0C0]"
+                            ? "bg-[#C49A6C] text-[#1E1A17]"
+                            : "bg-[#EEE4DC] text-[#8B6F5E] hover:bg-[#E0D0C0]"
                             }`}
                     >
                         {f === "todos" ? "Todos" : f.replace("_", " ")}
