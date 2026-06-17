@@ -1,6 +1,6 @@
 // AppRouter.jsx - Define las rutas de la aplicacion y protege las rutas segun el rol del usuario
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import DashboardLayout from "@/components/shared/DashboardLayout"
 
@@ -44,7 +44,7 @@ function RutaPublica({ children }) {
 // usando RutaProtegida para proteger las rutas segun el rol del usuario
 export default function AppRouter() {
     return (
-        <BrowserRouter>
+        <HashRouter>
             <Routes>
                 <Route path="/login" element={<RutaPublica><Login /></RutaPublica>} />
 
@@ -59,6 +59,6 @@ export default function AppRouter() {
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
-        </BrowserRouter>
+        </HashRouter>
     )
 }
