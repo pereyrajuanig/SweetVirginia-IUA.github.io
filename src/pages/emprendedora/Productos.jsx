@@ -2,13 +2,18 @@
 import { useState, useEffect } from "react"
 import { getProductos, toggleDisponibilidad } from "@/services/productosService"
 import { Button } from "@/components/ui/button"
+import Loader from "@/components/shared/Loader"
 
 export default function Productos() {
     const [productos, setProductos] = useState([])
     const [filtro, setFiltro] = useState("todos")
+    const [cargando, setCargando] = useState(true)
 
     useEffect(() => {
-        getProductos().then(setProductos)
+        setCargando(true)
+        getProductos()
+            .then(setProductos)
+            .finally(() => setCargando(false))
     }, [])
 
     async function handleToggle(id, disponibleActual) {
@@ -55,55 +60,62 @@ export default function Productos() {
                 ))}
             </div>
 
-            {/* Grid de productos */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {productosFiltrados.map((producto) => (
-                    <div
-                        key={producto.id}
-                        className="bg-white rounded-xl border border-[#E8DDD6] p-5"
-                    >
-                        {/* Imagen placeholder */}
-                        <div className="h-32 bg-[#F5E6D8] rounded-lg flex items-center justify-center mb-4">
-                            <span className="text-[#C49A6C] text-3xl">🧁</span>
-                        </div>
+            {/* Loader o contenido */}
+            {cargando ? (
+                <Loader />
+            ) : (
+                <>
+                    {/* Grid de productos */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {productosFiltrados.map((producto) => (
+                            <div
+                                key={producto.id}
+                                className="bg-white rounded-xl border border-[#E8DDD6] p-5"
+                            >
+                                {/* Imagen placeholder */}
+                                <div className="h-32 bg-[#F5E6D8] rounded-lg flex items-center justify-center mb-4">
+                                    <span className="text-[#C49A6C] text-3xl">🧁</span>
+                                </div>
 
-                        {/* Info */}
-                        <div className="flex items-start justify-between mb-2">
-                            <div>
-                                <p className="font-medium text-[#3D2B1F]">{producto.nombre}</p>
-                                <p className="text-xs text-[#A08070]">{producto.categoria}</p>
+                                {/* Info */}
+                                <div className="flex items-start justify-between mb-2">
+                                    <div>
+                                        <p className="font-medium text-[#3D2B1F]">{producto.nombre}</p>
+                                        <p className="text-xs text-[#A08070]">{producto.categoria}</p>
+                                    </div>
+                                    <span
+                                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${producto.disponible
+                                            ? "bg-[#E8F5E9] text-[#2E7D32]"
+                                            : "bg-[#EEE4DC] text-[#8B6F5E]"
+                                            }`}
+                                    >
+                                        {producto.disponible ? "Disponible" : "No disponible"}
+                                    </span>
+                                </div>
+
+                                <p className="text-sm text-[#5D6D7E] mb-3 line-clamp-2">
+                                    {producto.descripcion}
+                                </p>
+
+                                {/* Footer */}
+                                <div className="flex items-center justify-between pt-3 border-t border-[#E8DDD6]">
+                                    <p className="font-medium text-[#C49A6C] font-mono">
+                                        ${producto.precio.toLocaleString()}
+                                    </p>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleToggle(producto.id, producto.disponible)}
+                                        className="text-xs border-[#E8DDD6] text-[#7A6A5E] hover:bg-[#EEE4DC]"
+                                    >
+                                        {producto.disponible ? "Pausar" : "Activar"}
+                                    </Button>
+                                </div>
                             </div>
-                            <span
-                                className={`text-xs font-medium px-2.5 py-1 rounded-full ${producto.disponible
-                                    ? "bg-[#E8F5E9] text-[#2E7D32]"
-                                    : "bg-[#EEE4DC] text-[#8B6F5E]"
-                                    }`}
-                            >
-                                {producto.disponible ? "Disponible" : "No disponible"}
-                            </span>
-                        </div>
-
-                        <p className="text-sm text-[#5D6D7E] mb-3 line-clamp-2">
-                            {producto.descripcion}
-                        </p>
-
-                        {/* Footer */}
-                        <div className="flex items-center justify-between pt-3 border-t border-[#E8DDD6]">
-                            <p className="font-medium text-[#C49A6C] font-mono">
-                                ${producto.precio.toLocaleString()}
-                            </p>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleToggle(producto.id, producto.disponible)}
-                                className="text-xs border-[#E8DDD6] text-[#7A6A5E] hover:bg-[#EEE4DC]"
-                            >
-                                {producto.disponible ? "Pausar" : "Activar"}
-                            </Button>
-                        </div>
+                        ))}
                     </div>
-                ))}
-            </div>
+                </>
+            )}
         </div>
     )
 }

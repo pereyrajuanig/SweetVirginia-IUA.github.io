@@ -7,6 +7,7 @@ const USAR_MOCK = true
 // funcion para obtener los productos, usando el mock o haciendo una peticion a la API real
 export async function getProductos() {
     if (USAR_MOCK) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
         return productosMock
     }
     const res = await fetch("/api/v1/productos")
@@ -16,6 +17,7 @@ export async function getProductos() {
 // funcion para cambiar la disponibilidad de un producto, usando el mock o haciendo una peticion a la API real
 export async function toggleDisponibilidad(id, disponible) {
     if (USAR_MOCK) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
         return { id, disponible }
     }
     const res = await fetch(`/api/v1/productos/${id}/disponibilidad`, {

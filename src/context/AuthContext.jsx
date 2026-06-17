@@ -1,37 +1,57 @@
 // AuthContext.jsx - Contexto para manejar la autenticacion y el estado del usuario en toda la app
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react"
 
-const AuthContext = createContext(null); // crea el contexto de autenticacion, inicialmente sin usuario
+const AuthContext = createContext(null) // crea un contexto para la autenticacion
 
-// componente proveedor del contexto, maneja el estado del usuario y las funciones de login/logout, y calcula los roles del usuario
-export function AuthProvider({ children }) {
-    const [usuario, setUsuario] = useState(null);
+// Componente proveedor del contexto de autenticacion, maneja el estado del usuario y proporciona funciones para login y logout
+export function AuthProvider(props) {
+    const [usuario, setUsuario] = useState(null)
+    const [cargando, setCargando] = useState(true)
 
-    function login(datos) { // actualiza el estado del usuario con los datos recibidos al hacer login
-        setUsuario(datos);
+    // al montar el componente, intenta recuperar el usuario del localStorage y actualizar el estado, luego marca que ya no esta cargando
+    useEffect(() => {
+        const usuarioGuardado = localStorage.getItem("sv_usuario")
+        if (usuarioGuardado) {
+            setUsuario(JSON.parse(usuarioGuardado))
+        }
+        setCargando(false)
+    }, [])
+
+    // funcion para iniciar sesion, guarda el usuario en el estado y en el localStorage
+    function login(datos) {
+        setUsuario(datos)
+        localStorage.setItem("sv_usuario", JSON.stringify(datos))
     }
 
-    function logout() { // limpia el estado del usuario al hacer logout
-        setUsuario(null);
+    // funcion para cerrar sesion, elimina el usuario del estado y del localStorage
+    function logout() {
+        setUsuario(null)
+        localStorage.removeItem("sv_usuario")
     }
 
-    // calcula si el usuario tiene el rol de emprendedora o administrador
-    // para facilitar la proteccion de rutas y la renderizacion condicional en los componentes
-    const esEmprendedora = usuario?.roles?.includes("emprendedora");
-    const esAdmin = usuario?.roles?.includes("administrador");
+    // calcula si el usuario tiene el rol de emprendedora o administrador para usarlo en la proteccion de rutas
+    const esEmprendedora = usuario?.roles?.includes("emprendedora")
+    const esAdmin = usuario?.roles?.includes("administrador")
 
-    return ( // provee el contexto con el usuario, las funciones de login/logout y los roles calculados para que los componentes puedan acceder a ellos
-        <AuthContext.Provider
-            value={{ usuario, login, logout, esEmprendedora, esAdmin }}
-        >
-            {children}
+    // si el estado de cargando es true, muestra un loader mientras se recupera el usuario del localStorage
+    if (cargando) {
+        return (
+            <div className="min-h-screen bg-[#1E1A17] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full border-2 border-[#3A2F26] border-t-[#C49A6C] animate-spin"></div>
+            </div>
+        )
+    }
+
+    // proporciona el contexto de autenticacion a los componentes hijos, incluyendo el usuario, las funciones de login y logout, y los roles
+    return (
+        <AuthContext.Provider value={{ usuario, login, logout, esEmprendedora, esAdmin }}>
+            {props.children}
         </AuthContext.Provider>
-    );
+    )
 }
 
-// hook personalizado para acceder al contexto de autenticacion desde cualquier componente
-// devuelve el valor del contexto que incluye el usuario, las funciones de login/logout y los roles calculados
+// hook personalizado para usar el contexto de autenticacion en los componentes, devuelve el valor del contexto
 export function useAuth() {
-    return useContext(AuthContext);
+    return useContext(AuthContext)
 }

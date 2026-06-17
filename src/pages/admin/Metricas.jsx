@@ -3,16 +3,20 @@
 import { useState, useEffect } from "react"
 import { getPedidos } from "@/services/pedidosService"
 import { getProductos } from "@/services/productosService"
+import Loader from "@/components/shared/Loader"
 
 // Componente Metricas que muestra estadisticas clave sobre pedidos y productos, como total de pedidos, pendientes, entregados, productos activos
 // total de productos y ventas totales, asi como una lista de los ultimos pedidos realizados
 export default function Metricas() {
     const [pedidos, setPedidos] = useState([]) // estado para almacenar los pedidos obtenidos del backend
     const [productos, setProductos] = useState([]) // estado para almacenar los productos obtenidos del backend
+    const [cargando, setCargando] = useState(true) // estado para mostrar un loader mientras se cargan los datos
 
     useEffect(() => { // al cargar el componente, se obtienen los pedidos y productos desde el backend y se guardan en el estado
-        getPedidos().then(setPedidos)
-        getProductos().then(setProductos)
+        setCargando(true)
+        getPedidos()
+            .then(setPedidos)
+            .finally(() => setCargando(false))
     }, [])
 
     // se calculan las metricas a mostrar en base a los pedidos y productos obtenidos, como total de pedidos, pendientes, entregados, productos activos, total de productos y ventas totales
@@ -42,45 +46,51 @@ export default function Metricas() {
                 <p className="text-[#A08070] text-sm mt-1">Resumen de actividad de la plataforma</p>
             </div>
 
-            {/* Grid de métricas */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                {metricas.map((m) => (
-                    <div
-                        key={m.label}
-                        className={`rounded-xl p-5 ${m.color}`}
-                    >
-                        <p className="text-xs font-medium uppercase tracking-wide opacity-70 mb-1">
-                            {m.label}
-                        </p>
-                        <p className="text-3xl font-bold font-mono">{m.valor}</p>
-                    </div>
-                ))}
-            </div>
-
-            {/* Últimos pedidos */}
-            <div className="bg-white rounded-xl border border-[#E8DDD6] p-5">
-                <h2 className="font-semibold text-[#3D2B1F] mb-4">Últimos pedidos</h2>
-                <div className="flex flex-col gap-3">
-                    {pedidos.slice(0, 5).map((pedido) => (
-                        <div
-                            key={pedido.id}
-                            className="flex items-center justify-between py-2 border-b border-[#E8DDD6] last:border-0"
-                        >
-                            <div>
-                                <p className="text-sm font-medium text-[#3D2B1F]">{pedido.cliente.nombre}</p>
-                                <p className="text-xs text-[#A08070] font-mono">{pedido.numero_orden}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-sm font-medium text-[#C49A6C] font-mono">
-                                    ${pedido.subtotal.toLocaleString()}
+            {/* Loader o contenido */}
+            {cargando ? (
+                <Loader />
+            ) : (
+                <>
+                    {/* Grid de métricas */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                        {metricas.map((m) => (
+                            <div
+                                key={m.label}
+                                className={`rounded-xl p-5 ${m.color}`}
+                            >
+                                <p className="text-xs font-medium uppercase tracking-wide opacity-70 mb-1">
+                                    {m.label}
                                 </p>
-                                <p className="text-xs text-[#A08070]">{pedido.estado.replace("_", " ")}</p>
+                                <p className="text-3xl font-bold font-mono">{m.valor}</p>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                        ))}
+                    </div>
 
+                    {/* Últimos pedidos */}
+                    <div className="bg-white rounded-xl border border-[#E8DDD6] p-5">
+                        <h2 className="font-semibold text-[#3D2B1F] mb-4">Últimos pedidos</h2>
+                        <div className="flex flex-col gap-3">
+                            {pedidos.slice(0, 5).map((pedido) => (
+                                <div
+                                    key={pedido.id}
+                                    className="flex items-center justify-between py-2 border-b border-[#E8DDD6] last:border-0"
+                                >
+                                    <div>
+                                        <p className="text-sm font-medium text-[#3D2B1F]">{pedido.cliente.nombre}</p>
+                                        <p className="text-xs text-[#A08070] font-mono">{pedido.numero_orden}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-medium text-[#C49A6C] font-mono">
+                                            ${pedido.subtotal.toLocaleString()}
+                                        </p>
+                                        <p className="text-xs text-[#A08070]">{pedido.estado.replace("_", " ")}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }

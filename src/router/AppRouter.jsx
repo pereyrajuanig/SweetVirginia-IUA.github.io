@@ -11,6 +11,8 @@ import Perfil from "@/pages/emprendedora/Perfil"
 import Emprendedoras from "@/pages/admin/Emprendedoras"
 import Usuarios from "@/pages/admin/Usuarios"
 import Metricas from "@/pages/admin/Metricas"
+import NotFound from "@/pages/NotFound"
+
 
 // componente para proteger las rutas segun el rol del usuario, redirige a login si no esta autenticado o no tiene el rol requerido
 function RutaProtegida({ children, rol }) {
@@ -27,13 +29,24 @@ function RutaProtegida({ children, rol }) {
     return <DashboardLayout>{children}</DashboardLayout>
 }
 
+function RutaPublica({ children }) {
+    const { usuario, esAdmin } = useAuth()
+
+    if (usuario) { // si hay usuario autenticado, redirige a la pagina principal segun su rol
+        if (esAdmin) return <Navigate to="/admin/metricas" replace />
+        return <Navigate to="/pedidos" replace />
+    }
+
+    return children
+}
+
 // componente principal del router de la aplicacion, define las rutas y los componentes que se renderizan en cada una
 // usando RutaProtegida para proteger las rutas segun el rol del usuario
 export default function AppRouter() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<RutaPublica><Login /></RutaPublica>} />
 
                 <Route path="/pedidos" element={<RutaProtegida rol="emprendedora"><PanelPedidos /></RutaProtegida>} />
                 <Route path="/productos" element={<RutaProtegida rol="emprendedora"><Productos /></RutaProtegida>} />
@@ -44,6 +57,7 @@ export default function AppRouter() {
                 <Route path="/admin/usuarios" element={<RutaProtegida rol="administrador"><Usuarios /></RutaProtegida>} />
 
                 <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     )

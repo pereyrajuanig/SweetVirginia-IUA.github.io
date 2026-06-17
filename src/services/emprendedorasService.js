@@ -6,6 +6,7 @@ const USAR_MOCK = true
 
 export async function getEmprendedoras() {
     if (USAR_MOCK) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
         return emprendedorasMock
     }
     const res = await fetch("/api/v1/emprendedoras")
@@ -14,6 +15,7 @@ export async function getEmprendedoras() {
 
 export async function cambiarEstadoEmprendedora(id, decision) {
     if (USAR_MOCK) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
         return { id, estado: decision === "aprobada" ? "activa" : "suspendida" }
     }
     const res = await fetch(`/api/v1/emprendedoras/solicitud/${id}/decision`, {

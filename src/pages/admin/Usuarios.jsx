@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { getUsuarios, suspenderUsuario } from "@/services/usuariosService"
 import { Button } from "@/components/ui/button"
+import Loader from "@/components/shared/Loader"
 
 // Estilos para los roles
 const rolEstilo = {
@@ -18,9 +19,13 @@ export default function Usuarios() {
     const [usuarios, setUsuarios] = useState([])
     const [filtro, setFiltro] = useState("todos")
     const [busqueda, setBusqueda] = useState("")
+    const [cargando, setCargando] = useState(true)
 
     useEffect(() => { // Obtener usuarios al cargar la página
-        getUsuarios().then(setUsuarios)
+        setCargando(true)
+        getUsuarios()
+            .then(setUsuarios)
+            .finally(() => setCargando(false))
     }, [])
 
     async function handleSuspender(id) { // Suspender usuario y actualizar la lista
@@ -69,56 +74,62 @@ export default function Usuarios() {
                 </div>
             </div>
 
-            {/* Tabla */}
-            <div className="bg-white rounded-xl border border-[#E8DDD6] overflow-hidden">
-                {/* Header tabla */}
-                <div className="hidden sm:grid grid-cols-4 px-4 py-3 bg-[#EEE4DC] text-xs font-medium text-[#7A6A5E] uppercase tracking-wide">
-                    <span>Nombre</span>
-                    <span>Teléfono</span>
-                    <span>Rol</span>
-                    <span></span>
-                </div>
-
-                {usuariosFiltrados.length === 0 && (
-                    <p className="text-[#A08070] text-sm text-center py-12">
-                        No se encontraron usuarios.
-                    </p>
-                )}
-
-                {usuariosFiltrados.map((usuario, i) => (
-                    <div
-                        key={usuario.id}
-                        className={`flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-2 sm:gap-0 px-4 py-4 ${i !== usuariosFiltrados.length - 1 ? "border-b border-[#E8DDD6]" : ""
-                            }`}
-                    >
-                        <p className="font-medium text-[#3D2B1F] text-sm">{usuario.nombre}</p>
-                        <p className="text-[#A08070] text-sm font-mono">{usuario.telefono}</p>
-                        <div className="flex gap-1 flex-wrap">
-                            {usuario.roles.map((rol) => (
-                                <span
-                                    key={rol}
-                                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${rolEstilo[rol]}`}
-                                >
-                                    {rol}
-                                </span>
-                            ))}
+            {/* Loader o contenido */}
+            {cargando ? (
+                <Loader />
+            ) : (
+                <>
+                    {/* Tabla */}
+                    <div className="bg-white rounded-xl border border-[#E8DDD6] overflow-hidden">
+                        {/* Header tabla */}
+                        <div className="hidden sm:grid grid-cols-4 px-4 py-3 bg-[#EEE4DC] text-xs font-medium text-[#7A6A5E] uppercase tracking-wide">
+                            <span>Nombre</span>
+                            <span>Teléfono</span>
+                            <span>Rol</span>
+                            <span></span>
                         </div>
-                        <div className="flex justify-end">
-                            {!usuario.roles.includes("administrador") && (
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleSuspender(usuario.id)}
-                                    className="border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE] text-xs"
-                                >
-                                    Suspender
-                                </Button>
-                            )}
-                        </div>
+
+                        {usuariosFiltrados.length === 0 && (
+                            <p className="text-[#A08070] text-sm text-center py-12">
+                                No se encontraron usuarios.
+                            </p>
+                        )}
+
+                        {usuariosFiltrados.map((usuario, i) => (
+                            <div
+                                key={usuario.id}
+                                className={`flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-2 sm:gap-0 px-4 py-4 ${i !== usuariosFiltrados.length - 1 ? "border-b border-[#E8DDD6]" : ""
+                                    }`}
+                            >
+                                <p className="font-medium text-[#3D2B1F] text-sm">{usuario.nombre}</p>
+                                <p className="text-[#A08070] text-sm font-mono">{usuario.telefono}</p>
+                                <div className="flex gap-1 flex-wrap">
+                                    {usuario.roles.map((rol) => (
+                                        <span
+                                            key={rol}
+                                            className={`text-xs px-2.5 py-1 rounded-full font-medium ${rolEstilo[rol]}`}
+                                        >
+                                            {rol}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="flex justify-end">
+                                    {!usuario.roles.includes("administrador") && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleSuspender(usuario.id)}
+                                            className="border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE] text-xs"
+                                        >
+                                            Suspender
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-
+                </>
+            )}
         </div>
     )
 }

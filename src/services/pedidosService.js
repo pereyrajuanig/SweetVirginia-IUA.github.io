@@ -7,6 +7,7 @@ const USAR_MOCK = true
 // funcion para obtener los pedidos, usando el mock o haciendo una peticion a la API real
 export async function getPedidos() {
     if (USAR_MOCK) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
         return pedidosMock
     }
     const res = await fetch("/api/v1/pedidos")
@@ -16,6 +17,7 @@ export async function getPedidos() {
 // funcion para cambiar el estado de un pedido, usando el mock o haciendo una peticion a la API real
 export async function cambiarEstadoPedido(id, nuevoEstado) {
     if (USAR_MOCK) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
         return { id, estado: nuevoEstado }
     }
     const res = await fetch(`/api/v1/pedidos/${id}/estado`, {
