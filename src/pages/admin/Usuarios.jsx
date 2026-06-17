@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { getUsuarios, suspenderUsuario } from "@/services/usuariosService"
 import { Button } from "@/components/ui/button"
 import Loader from "@/components/shared/Loader"
+import { toast } from "sonner"
 
 // Estilos para los roles
 const rolEstilo = {
@@ -21,6 +22,7 @@ export default function Usuarios() {
     const [busqueda, setBusqueda] = useState("")
     const [cargando, setCargando] = useState(true)
 
+
     useEffect(() => { // Obtener usuarios al cargar la página
         setCargando(true)
         getUsuarios()
@@ -29,8 +31,18 @@ export default function Usuarios() {
     }, [])
 
     async function handleSuspender(id) { // Suspender usuario y actualizar la lista
-        await suspenderUsuario(id)
-        setUsuarios((prev) => prev.filter((u) => u.id !== id))
+        const usuario = usuarios.find((u) => u.id === id)
+        const nuevoEstado = !usuario.suspendido
+
+        await suspenderUsuario(id, nuevoEstado)
+        setUsuarios((prev) =>
+            prev.map((u) => u.id === id ? { ...u, suspendido: nuevoEstado } : u))
+
+        if (nuevoEstado) {
+            toast.error("Usuario suspendido.")
+        } else {
+            toast.success("Usuario reactivado.")
+        }
     }
 
     const usuariosFiltrados = usuarios // Aplicar filtros y busqueda
@@ -119,9 +131,12 @@ export default function Usuarios() {
                                             size="sm"
                                             variant="outline"
                                             onClick={() => handleSuspender(usuario.id)}
-                                            className="border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE] text-xs"
+                                            className={`text-xs ${usuario.suspendido
+                                                ? "border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE]"
+                                                : "border-[#4CAF50] text-[#4CAF50] hover:bg-[#E8F5E9]"
+                                                }`}
                                         >
-                                            Suspender
+                                            {usuario.suspendido ? "Reactivar" : "Suspender"}
                                         </Button>
                                     )}
                                 </div>
@@ -129,7 +144,8 @@ export default function Usuarios() {
                         ))}
                     </div>
                 </>
-            )}
-        </div>
+            )
+            }
+        </div >
     )
 }

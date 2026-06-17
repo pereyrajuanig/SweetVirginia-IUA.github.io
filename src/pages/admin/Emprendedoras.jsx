@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { getEmprendedoras, cambiarEstadoEmprendedora } from "@/services/emprendedorasService"
 import { Button } from "@/components/ui/button"
 import Loader from "@/components/shared/Loader"
+import { toast } from "sonner"
 
 // Estilos para los estados de las emprendedoras
 
@@ -37,7 +38,26 @@ export default function Emprendedoras() {
                     : e
             )
         )
+        if (decision === "aprobada") {
+            toast.success("Emprendedora aprobada.")
+        } else {
+            toast.error("Emprendedora rechazada.")
+        }
     }
+
+    // Funcion para manejar la suspension o reactivacion de una emprendedora, dependiendo de su estado actual
+    // llama al servicio para actualizar el estado en el backend y luego actualiza el estado local para reflejar el cambio
+    async function handleToggleSuspension(id, estadoActual) {
+        const nuevoEstado = estadoActual === "suspendida" ? "activa" : "suspendida"
+        await cambiarEstadoEmprendedora(id, nuevoEstado === "activa" ? "aprobada" : "rechazada")
+        setEmprendedoras((prev) =>
+            prev.map((e) => (e.id === id ? { ...e, estado: nuevoEstado } : e))
+        )
+        toast(nuevoEstado === "activa" ? "Emprendedora reactivada." : "Emprendedora suspendida.", {
+            type: nuevoEstado === "activa" ? "success" : "error",
+        })
+    }
+
     // Separa las emprendedoras en dos grupos: las que tienen solicitudes pendientes y el resto, para mostrarlas en secciones diferentes
     const pendientes = emprendedoras.filter((e) => e.estado === "pendiente")
     const resto = emprendedoras.filter((e) => e.estado !== "pendiente")
@@ -114,14 +134,17 @@ export default function Emprendedoras() {
                                     <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${badgeEstilo[e.estado]}`}>
                                         {e.estado}
                                     </span>
-                                    {e.estado === "activa" && (
+                                    {e.estado !== "pendiente" && (
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            onClick={() => handleDecision(e.id, "rechazada")}
-                                            className="border-[#E8DDD6] text-[#7A6A5E] hover:bg-[#EEE4DC] text-xs"
+                                            onClick={() => handleToggleSuspension(e.id, e.estado)}
+                                            className={`text-xs ${e.estado === "suspendida"
+                                                ? "border-[#4CAF50] text-[#4CAF50] hover:bg-[#E8F5E9]"
+                                                : "border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE]"
+                                                }`}
                                         >
-                                            Suspender
+                                            {e.estado === "suspendida" ? "Reactivar" : "Suspender"}
                                         </Button>
                                     )}
                                 </div>

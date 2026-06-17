@@ -13,13 +13,17 @@ export async function getUsuarios() {
     return res.json()
 }
 
-export async function suspenderUsuario(id) {
+export async function suspenderUsuario(id, suspendido) {
     if (USAR_MOCK) {
         await new Promise((resolve) => setTimeout(resolve, 500))
-        return { id, suspendido: true }
+        return { id, suspendido }
     }
     const res = await fetch(`/api/v1/usuarios/${id}/suspender`, {
         method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ suspendido })
     })
     return res.json()
 }

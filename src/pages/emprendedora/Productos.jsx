@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { getProductos, toggleDisponibilidad } from "@/services/productosService"
 import { Button } from "@/components/ui/button"
 import Loader from "@/components/shared/Loader"
+import { toast } from "sonner"
 
 export default function Productos() {
     const [productos, setProductos] = useState([])
@@ -21,6 +22,11 @@ export default function Productos() {
         setProductos((prev) =>
             prev.map((p) => (p.id === id ? { ...p, disponible: !disponibleActual } : p))
         )
+        if (disponibleActual) {
+            toast.error("Producto pausado.")
+        } else {
+            toast.success("Producto activado.")
+        }
     }
 
     const productosFiltrados =

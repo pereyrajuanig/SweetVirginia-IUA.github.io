@@ -22,6 +22,12 @@ export default function Login() {
     async function handleSubmit(e) {
         e.preventDefault() // evita que el formulario recargue la pagina
         setError(null) // resetea el mensaje de error
+
+        if (!telefono.trim() || !password.trim()) { // valida que se hayan ingresado ambos campos
+            setError("Por favor ingresa tu teléfono y contraseña.")
+            return
+        }
+
         setCargando(true) // indica que se esta procesando el login
 
         // llama al servicio de login con el telefono y la contraseña ingresados
