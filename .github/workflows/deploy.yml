@@ -25,13 +25,6 @@ jobs:
           cache: "pnpm"
 
       - run: pnpm install
-
-      - name: Verificar secret
-        run: |
-          echo "La key tiene ${#VITE_SUPABASE_ANON_KEY} caracteres"
-        env:
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-
       - run: pnpm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
