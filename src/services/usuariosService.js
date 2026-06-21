@@ -28,3 +28,18 @@ export async function suspenderUsuario(id, suspendido) {
 
   return data[0]
 }
+
+export async function actualizarUsuario(id, datos) {
+  const { data, error } = await supabase
+    .from("usuarios")
+    .update({ nombre: datos.nombre })
+    .eq("id", id)
+    .select()
+
+  if (error) {
+    console.error("Error al actualizar usuario:", error)
+    throw error
+  }
+
+  return data[0]
+}

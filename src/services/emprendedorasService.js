@@ -79,3 +79,21 @@ export async function getEmprendedoraPorTelefono(telefono) {
 
   return data
 }
+
+export async function actualizarEmprendedora(id, datos) {
+  const { data, error } = await supabase
+    .from("emprendedoras")
+    .update({
+      nombre_negocio: datos.nombre_negocio,
+      descripcion: datos.descripcion,
+    })
+    .eq("id", id)
+    .select()
+
+  if (error) {
+    console.error("Error al actualizar emprendedora:", error)
+    throw error
+  }
+
+  return data[0]
+}

@@ -27,7 +27,7 @@ export default function Productos() {
       if (emp) {
         setEmprendedoraId(emp.id);
       }
-      const data = await getProductos();
+      const data = emp ? await getProductos(emp.id) : [];
       setProductos(data);
       setCargando(false);
     }
@@ -46,6 +46,14 @@ export default function Productos() {
     } else {
       toast.success("Producto activado.");
     }
+  }
+
+  function actualizarProductoLocal(productoActualizado) {
+    setProductos((prev) =>
+      prev.map((p) =>
+        p.id === productoActualizado.id ? productoActualizado : p,
+      ),
+    );
   }
 
   const productosFiltrados =
@@ -144,16 +152,23 @@ export default function Productos() {
                       ? `$${producto.precio_desde.toLocaleString()} - $${producto.precio_hasta.toLocaleString()}`
                       : `$${producto.precio_desde.toLocaleString()}`}
                   </p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      handleToggle(producto.id, producto.disponible)
-                    }
-                    className="text-xs border-[#E8DDD6] text-[#7A6A5E] hover:bg-[#EEE4DC]"
-                  >
-                    {producto.disponible ? "Pausar" : "Activar"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <FormularioProducto
+                      emprendedoraId={emprendedoraId}
+                      productoExistente={producto}
+                      onProductoActualizado={actualizarProductoLocal}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        handleToggle(producto.id, producto.disponible)
+                      }
+                      className="text-xs border-[#E8DDD6] text-[#7A6A5E] hover:bg-[#EEE4DC]"
+                    >
+                      {producto.disponible ? "Pausar" : "Activar"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}

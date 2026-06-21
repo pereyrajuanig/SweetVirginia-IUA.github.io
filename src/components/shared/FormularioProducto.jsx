@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { crearProducto } from "@/services/productosService";
+import { useState, useEffect } from "react";
+import { crearProducto, actualizarProducto } from "@/services/productosService";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,8 @@ const categorias = ["Tortas", "Postres", "Alfajores", "Budines", "Otros"];
 export default function FormularioProducto({
   emprendedoraId,
   onProductoCreado,
+  productoExistente,
+  onProductoActualizado,
 }) {
   const [open, setOpen] = useState(false);
   const [guardando, setGuardando] = useState(false);
@@ -28,6 +30,17 @@ export default function FormularioProducto({
     precioHasta: "",
     categoria: "Tortas",
   });
+  useEffect(() => {
+    if (open && productoExistente) {
+      setForm({
+        nombre: productoExistente.nombre,
+        descripcion: productoExistente.descripcion || "",
+        precioDesde: productoExistente.precio_desde.toString(),
+        precioHasta: productoExistente.precio_hasta?.toString() || "",
+        categoria: productoExistente.categoria,
+      });
+    }
+  }, [open, productoExistente]);
 
   function handleChange(campo, valor) {
     setForm((prev) => ({ ...prev, [campo]: valor }));
@@ -44,23 +57,47 @@ export default function FormularioProducto({
     setGuardando(true);
 
     try {
-      const nuevoProducto = await crearProducto({
-        emprendedora_id: emprendedoraId,
-        nombre: form.nombre,
-        descripcion: form.descripcion,
-        precio_desde: parseFloat(form.precioDesde),
-        precio_hasta: form.precioHasta ? parseFloat(form.precioHasta) : null,
-        categoria: form.categoria,
-        disponible: true,
-        activo: true,
-      });
+      if (productoExistente) {
+        const actualizado = await actualizarProducto(productoExistente.id, {
+          nombre: form.nombre,
+          descripcion: form.descripcion,
+          precio_desde: parseFloat(form.precioDesde),
+          precio_hasta: form.precioHasta ? parseFloat(form.precioHasta) : null,
+          categoria: form.categoria,
+        });
 
-      toast.success("Producto creado exitosamente.");
-      onProductoCreado(nuevoProducto);
-      setForm({ nombre: "", descripcion: "", precio: "", categoria: "Tortas" });
+        toast.success("Producto actualizado exitosamente.");
+        onProductoActualizado(actualizado);
+      } else {
+        const nuevoProducto = await crearProducto({
+          emprendedora_id: emprendedoraId,
+          nombre: form.nombre,
+          descripcion: form.descripcion,
+          precio_desde: parseFloat(form.precioDesde),
+          precio_hasta: form.precioHasta ? parseFloat(form.precioHasta) : null,
+          categoria: form.categoria,
+          disponible: true,
+          activo: true,
+        });
+
+        toast.success("Producto creado exitosamente.");
+        onProductoCreado(nuevoProducto);
+      }
+
+      setForm({
+        nombre: "",
+        descripcion: "",
+        precioDesde: "",
+        precioHasta: "",
+        categoria: "Tortas",
+      });
       setOpen(false);
     } catch (error) {
-      toast.error("Hubo un error al crear el producto.");
+      toast.error(
+        productoExistente
+          ? "Hubo un error al actualizar el producto."
+          : "Hubo un error al crear el producto.",
+      );
     }
 
     setGuardando(false);
@@ -69,13 +106,25 @@ export default function FormularioProducto({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#C49A6C] hover:bg-[#B08050] text-[#1E1A17]">
-          + Nuevo producto
-        </Button>
+        {productoExistente ? (
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs border-[#88A5C1] text-[#1565C0] hover:bg-[#E3F0FA]"
+          >
+            Editar
+          </Button>
+        ) : (
+          <Button className="bg-[#C49A6C] hover:bg-[#B08050] text-[#1E1A17]">
+            + Nuevo producto
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="bg-[#FDF8F4] border-[#E8DDD6]">
         <DialogHeader>
-          <DialogTitle className="text-[#3D2B1F]">Nuevo producto</DialogTitle>
+          <DialogTitle className="text-[#3D2B1F]">
+            {productoExistente ? "Editar producto" : "Nuevo producto"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
@@ -145,7 +194,11 @@ export default function FormularioProducto({
             disabled={guardando}
             className="w-full bg-[#C49A6C] hover:bg-[#B08050] text-[#1E1A17] mt-2"
           >
-            {guardando ? "Guardando..." : "Crear producto"}
+            {guardando
+              ? "Guardando..."
+              : productoExistente
+                ? "Guardar cambios"
+                : "Crear producto"}
           </Button>
         </form>
       </DialogContent>

@@ -1,10 +1,16 @@
 import { supabase } from "@/lib/supabase"
 
-export async function getProductos() {
-  const { data, error } = await supabase
+export async function getProductos(emprendedoraId = null) {
+  let query = supabase
     .from("productos")
     .select("*")
     .order("created_at", { ascending: false })
+
+  if (emprendedoraId) {
+    query = query.eq("emprendedora_id", emprendedoraId)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     console.error("Error al obtener productos:", error)
@@ -37,6 +43,27 @@ export async function toggleDisponibilidad(id, disponible) {
 
   if (error) {
     console.error("Error al actualizar disponibilidad:", error)
+    throw error
+  }
+
+  return data[0]
+}
+
+export async function actualizarProducto(id, producto) {
+  const { data, error } = await supabase
+    .from("productos")
+    .update({
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      precio_desde: producto.precio_desde,
+      precio_hasta: producto.precio_hasta,
+      categoria: producto.categoria,
+    })
+    .eq("id", id)
+    .select()
+
+  if (error) {
+    console.error("Error al actualizar producto:", error)
     throw error
   }
 

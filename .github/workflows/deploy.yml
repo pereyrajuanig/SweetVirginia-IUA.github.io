@@ -25,6 +25,7 @@ jobs:
           cache: "pnpm"
 
       - run: pnpm install
+      
       - run: pnpm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
