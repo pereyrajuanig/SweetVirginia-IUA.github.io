@@ -4,6 +4,7 @@ export async function getProductos(emprendedoraId = null) {
   let query = supabase
     .from("productos")
     .select("*")
+    .eq("activo", true)
     .order("created_at", { ascending: false })
 
   if (emprendedoraId) {
@@ -64,6 +65,21 @@ export async function actualizarProducto(id, producto) {
 
   if (error) {
     console.error("Error al actualizar producto:", error)
+    throw error
+  }
+
+  return data[0]
+}
+
+export async function eliminarProducto(id) {
+  const { data, error } = await supabase
+    .from("productos")
+    .update({ activo: false })
+    .eq("id", id)
+    .select()
+
+  if (error) {
+    console.error("Error al eliminar producto:", error)
     throw error
   }
 

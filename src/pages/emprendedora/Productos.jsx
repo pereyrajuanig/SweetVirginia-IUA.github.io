@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import FormularioProducto from "@/components/shared/FormularioProducto";
 import { useAuth } from "@/context/AuthContext";
 import { getEmprendedoraPorTelefono } from "@/services/emprendedorasService";
+import { eliminarProducto } from "@/services/productosService";
 
 export default function Productos() {
   const [productos, setProductos] = useState([]);
@@ -46,6 +47,17 @@ export default function Productos() {
     } else {
       toast.success("Producto activado.");
     }
+  }
+
+  async function handleEliminar(id) {
+    const confirmar = window.confirm(
+      "¿Seguro que querés eliminar este producto? Ya no aparecerá en tu catálogo.",
+    );
+    if (!confirmar) return;
+
+    await eliminarProducto(id);
+    setProductos((prev) => prev.filter((p) => p.id !== id));
+    toast.warning("Producto eliminado.");
   }
 
   function actualizarProductoLocal(productoActualizado) {
@@ -145,14 +157,14 @@ export default function Productos() {
                 </p>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-[#E8DDD6]">
+                <div className="flex flex-col gap-3 pt-3 border-t border-[#E8DDD6]">
                   <p className="font-medium text-[#C49A6C] font-mono">
                     {producto.precio_hasta &&
                     producto.precio_hasta !== producto.precio_desde
                       ? `$${producto.precio_desde.toLocaleString()} - $${producto.precio_hasta.toLocaleString()}`
                       : `$${producto.precio_desde.toLocaleString()}`}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 justify-end">
                     <FormularioProducto
                       emprendedoraId={emprendedoraId}
                       productoExistente={producto}
@@ -164,9 +176,17 @@ export default function Productos() {
                       onClick={() =>
                         handleToggle(producto.id, producto.disponible)
                       }
-                      className="text-xs border-[#E8DDD6] text-[#7A6A5E] hover:bg-[#EEE4DC]"
+                      className="flex-1 text-xs border-[#E8DDD6] text-[#7A6A5E] hover:bg-[#EEE4DC]"
                     >
                       {producto.disponible ? "Pausar" : "Activar"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEliminar(producto.id)}
+                      className="text-xs border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE]"
+                    >
+                      Eliminar
                     </Button>
                   </div>
                 </div>
